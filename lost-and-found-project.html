@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lost and Found Project</title>
+  <link rel="stylesheet" href="lost-and-found-project.css">
+</head>
+
+<body>
+  <header>
+    <h1>SLSU </br> Lost & Found Website</h1>
+    <p>Helping students find their belongings</p>
+  </header>
+  
+  <nav>
+    <a href="#lost">Lost Items</a>
+    <a href="#found">Found Items</a>
+    <a href="#report">Report Item</a>
+  </nav>
+  
+  <div class="container">
+    <section id="lost">
+      <h2>Lost Items</h2>
+      <div id="lostList"></div>
+    </section>
+    
+    <section id="found">
+      <h2>Found Items</h2>
+      <div id="foundList"></div>
+    </section>
+    
+    <section id="report">
+      <h2>Report an Item</h2>
+      <form id="reportForm">
+        <label for="type">Item Type</label>
+        <select id="type" required>
+          <option value="lost">Lost</option>
+          <option value="found">Found</option>
+        </select>
+        
+        <label for="item">Item Name</label>
+        <input type="text" id="item" required>
+        
+        <label for="desc">Description</label>
+        <textarea id="desc" rows="3"></textarea>
+        
+        <label for="location">Location</label>
+        <select id="location" required>
+          <option value="" disabled selected>-- Select Location --</option>
+          <option value="EBA">EBA</option>
+          <option value="EBB">EBB</option>
+          <option value="ADMIN">ADMIN</option>
+          <option value="CANTEEN">CANTEEN</option>
+          <option value="COVERED COURT">COVERED COURT</option>
+          <option value="LIBRARY">LIBRARY</option>
+        </select>
+        
+        <label for="contact">Contact Info (Student ID)</label>
+        <input type="text" id="contact" required pattern="^\d{2}[A-Z]-\d{6}$" placeholder="Enter your Student ID">
+        
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </div>
+  
+  <script src="lost-and-found-project.js"></script>
+</body>
+
+</html>
