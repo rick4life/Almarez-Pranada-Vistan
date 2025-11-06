@@ -20,9 +20,15 @@ function displayItems() {
     `;
     if (item.type === "lost") lostList.appendChild(div);
     else foundList.appendChild(div);
+    
+    // Add animation delay effect
+    setTimeout(() => {
+      div.style.opacity = "1";
+    }, 100);
   });
 }
 
+// Handle form submission
 document.getElementById("reportForm").addEventListener("submit", function(e) {
   e.preventDefault();
   const type = document.getElementById("type").value;
@@ -38,6 +44,7 @@ document.getElementById("reportForm").addEventListener("submit", function(e) {
   displayItems();
 });
 
+// Mark item as claimed
 function markClaimed(index) {
   let inputContact = prompt("Enter the contact info used when reporting this item:");
   if (inputContact === items[index].contact) {
@@ -50,6 +57,7 @@ function markClaimed(index) {
   }
 }
 
+// Smooth scrolling for nav
 document.addEventListener("DOMContentLoaded", () => {
   const links = document.querySelectorAll("nav a");
   links.forEach(link => {
@@ -58,6 +66,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const sectionId = link.getAttribute("href").substring(1);
       document.getElementById(sectionId).scrollIntoView({ behavior: "smooth" });
     });
+  });
+});
+
+// Scroll reveal animation for sections
+const sections = document.querySelectorAll("section");
+
+window.addEventListener("scroll", () => {
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 100) {
+      sec.style.opacity = "1";
+      sec.style.transform = "translateY(0)";
+    }
   });
 });
 
