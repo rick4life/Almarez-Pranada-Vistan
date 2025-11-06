@@ -6,17 +6,55 @@ body {
   overflow-x: hidden;
 }
 
-/* Header */
 header {
-  background: #2c3e50;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px 60px;
+  background: linear-gradient(135deg, #004aad, #00b4d8);
   color: white;
-  padding: 20px;
-  text-align: center;
-  animation: slideDown 0.8s ease forwards;
-  opacity: 0;
+  border-bottom: 4px solid #023e8a;
+  flex-wrap: wrap;
 }
 
-/* Navigation */
+header h1 {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 32px;
+}
+
+header p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 700px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .logo {
+    margin-top: 15px;
+  }
+
+  header h1 {
+    font-size: 24px;
+  }
+}
+
 nav {
   background: #34495e;
   padding: 10px;
@@ -37,7 +75,6 @@ nav a:hover {
   color: #f1c40f;
 }
 
-/* Container and sections */
 .container {
   padding: 20px;
   max-width: 900px;
@@ -45,18 +82,21 @@ nav a:hover {
 }
 
 section {
-  opacity: 0;
-  transform: translateY(50px);
+  opacity: 1;
+  transform: translateY(0);
   transition: all 0.8s ease;
   margin-bottom: 40px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Headings */
 h2 {
   color: #2c3e50;
+  margin-top: 0;
 }
 
-/* Cards */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -73,9 +113,10 @@ h2 {
   padding: 15px;
   margin: 10px 0;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.6s ease forwards;
   opacity: 0;
+  animation-fill-mode: forwards;
 }
 
 .card h3 {
@@ -83,7 +124,6 @@ h2 {
   color: #2980b9;
 }
 
-/* Form styling */
 .form-group {
   margin-bottom: 15px;
   display: flex;
@@ -95,7 +135,10 @@ label {
   font-weight: bold;
 }
 
-input, textarea, select, button {
+input,
+textarea,
+select,
+button {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -118,16 +161,14 @@ button {
 button:hover {
   transform: scale(1.05);
   background: #1f6391;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Claimed items */
 .claimed {
   text-decoration: line-through;
   opacity: 0.6;
 }
 
-/* Keyframes */
 @keyframes slideDown {
   from {
     transform: translateY(-30px);
@@ -139,11 +180,11 @@ button:hover {
   }
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   h1 {
     font-size: 20px;
   }
+
   nav a {
     display: block;
     margin: 10px 0;
