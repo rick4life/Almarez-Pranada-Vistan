@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLSU Lost and Found Project</title>
+  <link rel="stylesheet" href="lost-and-found-project1.css">
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>SLSU<br>Lost & Found Website</h1>
+      <p>Helping students find their belongings</p>
+    </div>
+    <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
+  </header>
+
+  <nav>
+    <a href="#Lost">Lost Items</a>
+    <a href="#Found">Found Items</a>
+    <a href="#Report">Report Item</a>
+  </nav>
+
+  <div class="container">
+    <section id="lost">
+      <h2>Lost Items</h2>
+      <div id="lostList"></div>
+    </section>
+
+    <section id="found">
+      <h2>Found Items</h2>
+      <div id="foundList"></div>
+    </section>
+
+    <section id="report">
+      <h2>Report an Item</h2>
+      <form id="reportForm">
+        <div class="form-group">
+          <label for="type">Item Type</label>
+          <select id="type" required>
+            <option value="lost">Lost</option>
+            <option value="found">Found</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="item">Item Name</label>
+          <input type="text" id="item" required placeholder="Enter the item name">
+        </div>
+
+        <div class="form-group">
+          <label for="desc">Description</label>
+          <textarea id="desc" rows="3" placeholder="Brief description of the item"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <select id="location" required>
+            <option value="" disabled selected>-- Select Location --</option>
+            <option value="EBA">EBA</option>
+            <option value="EBB">EBB</option>
+            <option value="ADMIN">ADMIN</option>
+            <option value="CANTEEN">CANTEEN</option>
+            <option value="COVERED COURT">COVERED COURT</option>
+            <option value="LIBRARY">LIBRARY</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contact">Contact Info (Student ID)</label>
+          <input type="text" id="contact" required pattern="^[0-9]{2}[A-Za-z]-[0-9]{4}$" placeholder="e.g., 23D-0315" title="Format: 2 digits, 1 letter, dash, 4 digits (e.g., 23D-0315)">
+        </div>
+
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </div>
+
+  <script src="lost-and-found-project.js"></script>
+</body>
+</html>
