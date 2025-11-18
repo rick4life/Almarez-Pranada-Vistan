@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Item</title>
+  <link rel="stylesheet" href="lost-and-found-project.css">
+</head>
+<body>
+  <header>
+    <h1>Report an Item</h1>
+    <a href="home.html">Back</a>
+  </header>
+
+  <form id="reportForm" class="report-form">
+    <select id="type" required>
+      <option value="" disabled selected>Select Type</option>
+      <option value="lost">Lost</option>
+      <option value="found">Found</option>
+    </select>
+    <input type="text" id="name" placeholder="Item Name" required>
+    <textarea id="desc" placeholder="Description"></textarea>
+    <select id="location" required>
+      <option value="" disabled selected>Select Location</option>
+      <option value="EBA">EBA</option>
+      <option value="EBB">EBB</option>
+      <option value="ADMIN">ADMIN</option>
+      <option value="CANTEEN">CANTEEN</option>
+      <option value="COVERED COURT">COVERED COURT</option>
+      <option value="LIBRARY">LIBRARY</option>
+    </select>
+    <button type="submit">Submit Report</button>
+  </form>
+
+  <div id="matches"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRaaBNfbHWYb63RH2c2SHAtu5vS7o6_vw",
+      authDomain: "slsu-lost-found.firebaseapp.com",
+      projectId: "slsu-lost-found",
+      storageBucket: "slsu-lost-found.firebasestorage.app",
+      messagingSenderId: "265246771102",
+      appId: "1:265246771102:web:6ad824c419d66ea5c1b88f",
+      measurementId: "G-KD93HXQEHM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = "login.html";
+      else currentUser = user;
+    });
+
+    const reportForm = document.getElementById("reportForm");
+    const matchesDiv = document.getElementById("matches");
+
+    reportForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const type = document.getElementById("type").value;
+      const name = document.getElementById("name").value.toLowerCase();
+      const desc = document.getElementById("desc").value.toLowerCase();
+      const location = document.getElementById("location").value;
+
+      const newItem = {
+        type,
+        name,
+        desc,
+        location,
+        userId: currentUser.uid,
+        timestamp: new Date()
+      };
+
+      await addDoc(collection(db, "items"), newItem);
+      alert("Report submitted!");
+
+      // Match items
+      const itemsSnapshot = await getDocs(collection(db, "items"));
+      matchesDiv.innerHTML = "<h3>Possible Matches:</h3>";
+      itemsSnapshot.forEach(docSnap => {
+        const item = docSnap.data();
+        if (item.userId !== currentUser.uid && item.type !== type) {
+          // Check basic keyword match
+          const commonWords = item.name.split(" ").filter(w => name.includes(w));
+          if (commonWords.length > 0) {
+            matchesDiv.innerHTML += `<div class="match-card">
+              <p><b>Item:</b> ${item.name}</p>
+              <p><b>Description:</b> ${item.desc}</p>
+              <p><b>Location:</b> ${item.location}</p>
+              <p><b>Contact:</b> ${item.userId}</p>
+            </div>`;
+          }
+        }
+      });
+
+      reportForm.reset();
+    });
+  </script>
+</body>
+</html>

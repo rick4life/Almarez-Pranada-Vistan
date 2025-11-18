@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLSU Lost & Found - Home</title>
+  <link rel="stylesheet" href="lost-and-found-project.css">
+</head>
+<body>
+  <header>
+    <h1>Welcome to SLSU Lost & Found</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
+  <div class="home-container">
+    <a href="lost.html" class="home-card">View Lost Items</a>
+    <a href="found.html" class="home-card">View Found Items</a>
+    <a href="report.html" class="home-card">Report an Item</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRaaBNfbHWYb63RH2c2SHAtu5vS7o6_vw",
+      authDomain: "slsu-lost-found.firebaseapp.com",
+      projectId: "slsu-lost-found",
+      storageBucket: "slsu-lost-found.firebasestorage.app",
+      messagingSenderId: "265246771102",
+      appId: "1:265246771102:web:6ad824c419d66ea5c1b88f",
+      measurementId: "G-KD93HXQEHM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Redirect if not logged in
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = "login.html";
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      signOut(auth).then(() => window.location.href = "login.html");
+    });
+  </script>
+</body>
+</html>
