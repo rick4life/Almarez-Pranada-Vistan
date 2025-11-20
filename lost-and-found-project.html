@@ -4,80 +4,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SLSU Lost and Found Project</title>
+  <title>SLSU Lost and Found Portal</title>
   <link rel="stylesheet" href="lost-and-found-project1.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <header>
-    <div>
-      <h1>SLSU<br>Lost & Found Website</h1>
-      <p>Helping students find their belongings</p>
+
+  <header class="header">
+    <div class="title-box">
+      <h1>SLSU Lost & Found Portal</h1>
+      <p>Your campus help desk for lost belongings</p>
     </div>
     <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
   </header>
 
-  <nav>
-    <a href="#Lost">Lost Items</a>
-    <a href="#Found">Found Items</a>
-    <a href="#Report">Report Item</a>
+  <nav class="navbar"> 
+    <a href="#lostItems">Lost Items</a>
+    <a href="#foundItems">Found Items</a>
+    <a href="#reportSection">Report Item</a>
   </nav>
 
-  <div class="container">
-    <section id="lost">
+  <main class="container">
+
+    <section id="lostItems" class="panel">
       <h2>Lost Items</h2>
-      <div id="lostList"></div>
+      <p class="section-desc">Items reported missing by SLSU students.</p>
+      <div id="lostList" class="item-list"></div>
     </section>
 
-    <section id="found">
+    <section id="foundItems" class="panel">
       <h2>Found Items</h2>
-      <div id="foundList"></div>
+      <p class="section-desc">Items turned in by students or staff.</p>
+      <div id="foundList" class="item-list"></div>
     </section>
 
-    <section id="report">
+    <section id="reportSection" class="panel">
       <h2>Report an Item</h2>
-      <form id="reportForm">
+      <p class="section-desc">Submit lost or found items to appear on the list.</p>
+
+      <form id="reportForm" class="report-form">
+
         <div class="form-group">
-          <label for="type">Item Type</label>
+          <label for="type">Report Type</label>
           <select id="type" required>
-            <option value="lost">Lost</option>
-            <option value="found">Found</option>
+            <option value="lost">Lost Item</option>
+            <option value="found">Found Item</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="item">Item Name</label>
-          <input type="text" id="item" required placeholder="Enter the item name">
+          <input type="text" id="item" required placeholder="Example: Black Wallet, ID Lace">
         </div>
 
         <div class="form-group">
-          <label for="desc">Description</label>
-          <textarea id="desc" rows="3" placeholder="Brief description of the item"></textarea>
+          <label for="desc">Item Description</label>
+          <textarea id="desc" rows="4" placeholder="Material, color, unique marks, etc."></textarea>
         </div>
 
         <div class="form-group">
-          <label for="location">Location</label>
+          <label for="location">Last Seen / Found Location</label>
           <select id="location" required>
             <option value="" disabled selected>-- Select Location --</option>
-            <option value="EBA">EBA</option>
-            <option value="EBB">EBB</option>
-            <option value="ADMIN">ADMIN</option>
-            <option value="CANTEEN">CANTEEN</option>
-            <option value="COVERED COURT">COVERED COURT</option>
-            <option value="LIBRARY">LIBRARY</option>
+            <option value="EBA">EBA Building</option>
+            <option value="EBB">EBB Building</option>
+            <option value="ADMIN">Admin Office</option>
+            <option value="CANTEEN">Canteen</option>
+            <option value="COVERED COURT">Covered Court</option>
+            <option value="LIBRARY">Library</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="contact">Contact Info (Student ID)</label>
-          <input type="text" id="contact" required pattern="^[0-9]{2}[A-Za-z]-[0-9]{4}$" placeholder="e.g., 23D-0315" title="Format: 2 digits, 1 letter, dash, 4 digits (e.g., 23D-0315)">
+          <label for="date">Date Lost/Found</label>
+          <input type="date" id="date" required>
         </div>
 
-        <button type="submit">Submit</button>
+        <div class="form-group">
+          <label for="contact">Contact (Student ID)</label>
+          <input type="text" id="contact" required pattern="^[0-9]{2}[A-Za-z]-[0-9]{4}$" placeholder="Example: 23D-0315">
+        </div>
+
+        <div class="form-group">
+          <label for="imageUpload">Upload Image (Optional)</label>
+          <input type="file" id="imageUpload" accept="image/*">
+          <img id="imagePreview" class="image-preview" style="display:none;">
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Report</button>
       </form>
     </section>
+
+  </main>
+
+  <div id="itemModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close-btn">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <img id="modalImage" class="modal-image" alt="Item Image">
+      <p><strong>Description:</strong> <span id="modalDesc"></span></p>
+      <p><strong>Location:</strong> <span id="modalLocation"></span></p>
+      <p><strong>Date:</strong> <span id="modalDate"></span></p>
+      <p><strong>Contact:</strong> <span id="modalContact"></span></p>
+    </div>
   </div>
+
+  <footer class="footer">
+    <p>&copy; 2025 SLSU Lost & Found Project | Made for Student Assistance</p>
+  </footer>
 
   <script src="lost-and-found-project.js"></script>
 </body>
+
 </html>
