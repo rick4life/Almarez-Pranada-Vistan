@@ -331,3 +331,37 @@ nav a.active {
     padding: 12px 0;
   }
 }
+
+/* ----- Card Styling for Lost/Found Items ----- */
+.card {
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin: 15px 0;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.3s ease;
+}
+
+.card h3 {
+  margin: 0 0 10px 0;
+  color: #004aad;
+  font-size: 1.2rem;
+}
+
+.card p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
