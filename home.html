@@ -8,41 +8,84 @@
 </head>
 <body>
   <header>
-    <h1>Welcome to SLSU Lost & Found</h1>
-    <button id="logoutBtn">Logout</button>
+    <div class="logo-container">
+      <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
+      <h1>Welcome to SLSU Lost & Found Portal</h1>
+    </div>
+    <button id="logoutBtn" class="logout">Logout</button>
   </header>
 
-  <div class="home-container">
-    <a href="lost.html" class="home-card">View Lost Items</a>
-    <a href="found.html" class="home-card">View Found Items</a>
-    <a href="report.html" class="home-card">Report an Item</a>
+  <nav>
+    <a href="lost.html" id="lostBtn">Lost Items</a>
+    <a href="found.html" id="foundBtn">Found Items</a>
+  </nav>
+
+  <!-- Report Form Section -->
+  <section id="reportFormContainer">
+    <form id="reportForm" class="report-form">
+      <h2>Report an Item</h2>
+
+      <div class="form-group">
+        <label for="type">Report Type</label>
+        <select id="type" required>
+          <option value="lost">Lost Item</option>
+          <option value="found">Found Item</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="item">Item Name</label>
+        <input type="text" id="item" required placeholder="Example: Black Wallet, ID Lace">
+      </div>
+
+      <div class="form-group">
+        <label for="desc">Item Description</label>
+        <textarea id="desc" rows="4" placeholder="Material, color, unique marks, etc."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Last Seen / Found Location</label>
+        <select id="location" required>
+          <option value="" disabled selected>-- Select Location --</option>
+          <option value="EBA">EBA Building</option>
+          <option value="EBB">EBB Building</option>
+          <option value="ADMIN">Admin Office</option>
+          <option value="CANTEEN">Canteen</option>
+          <option value="COVERED COURT">Covered Court</option>
+          <option value="LIBRARY">Library</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date Lost/Found</label>
+        <input type="date" id="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="contact">Contact (Student ID)</label>
+        <input type="text" id="contact" required pattern="^[0-9]{2}[A-Za-z]-[0-9]{4}$" placeholder="Example: 23D-0315">
+      </div>
+
+      <div class="form-group">
+        <label for="imageUpload">Upload Image (Optional)</label>
+        <input type="file" id="imageUpload" accept="image/*">
+        <img id="imagePreview" class="image-preview" style="display:none;">
+      </div>
+
+      <button type="submit" class="submit-btn" disabled>Submit Report</button>
+    </form>
+  </section>
+
+  <!-- Lost Items Section -->
+  <div id="lostList" style="display:none;">
+    <h2 style="text-align:center; margin-top:20px;">Lost Items</h2>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+  <!-- Found Items Section -->
+  <div id="foundList" style="display:none;">
+    <h2 style="text-align:center; margin-top:20px;">Found Items</h2>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDRaaBNfbHWYb63RH2c2SHAtu5vS7o6_vw",
-      authDomain: "slsu-lost-found.firebaseapp.com",
-      projectId: "slsu-lost-found",
-      storageBucket: "slsu-lost-found.firebasestorage.app",
-      messagingSenderId: "265246771102",
-      appId: "1:265246771102:web:6ad824c419d66ea5c1b88f",
-      measurementId: "G-KD93HXQEHM"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Redirect if not logged in
-    onAuthStateChanged(auth, (user) => {
-      if (!user) window.location.href = "login.html";
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      signOut(auth).then(() => window.location.href = "login.html");
-    });
-  </script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -1,88 +1,298 @@
+/* General body styling */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   background: #f0f4f8;
   color: #333;
+  overflow-x: hidden;
 }
 
+/* Header with logo and shine animation */
 header {
   background: linear-gradient(135deg,#004aad,#00b4d8);
   color: #fff;
-  padding: 20px;
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+header::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(45deg);
+  animation: headerShine 3s linear infinite;
+}
+
+@keyframes headerShine {
+  0% {transform: rotate(45deg) translateX(-100%);}
+  100% {transform: rotate(45deg) translateX(100%);}
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
 }
 
 header h1 {
   margin: 0;
+  font-size: 28px;
 }
 
-.auth-container, .home-container, .report-form {
-  max-width: 500px;
-  margin: 40px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.1);
-  animation: fadeInUp 0.8s ease forwards;
-}
-
-input, select, textarea, button {
-  display: block;
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+/* Logout button */
+.logout {
+  padding: 10px 18px;
   font-size: 14px;
+  border-radius: 8px;
+  height: auto;
 }
 
-button {
-  background: #2980b9;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-button:hover {
-  background: #1f6391;
-  transform: scale(1.05);
-}
-
-.home-container {
+/* Navigation Bar */
+nav {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
+  justify-content: center;
+  background: linear-gradient(135deg, #004aad, #00b4d8);
+  padding: 12px 0;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.home-card {
-  display: block;
-  width: 150px;
-  text-align: center;
-  background: #2980b9;
+nav a {
   color: white;
-  padding: 20px;
-  margin: 10px;
-  border-radius: 10px;
   text-decoration: none;
-  transition: all 0.3s;
-}
-
-.home-card:hover {
-  background: #1f6391;
-  transform: scale(1.05);
-}
-
-.match-card {
-  background: #e0f7fa;
-  margin: 10px 0;
-  padding: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0 20px;
+  position: relative;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
   border-radius: 8px;
 }
 
+nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: #ffdd59;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+nav a.active {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* Report Form */
+.report-form {
+  max-width: 450px;
+  margin: 40px auto;
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  padding: 35px 30px;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  animation: fadeInUp 0.8s ease forwards;
+  text-align: left;
+}
+
+.report-form h2 {
+  color: #004aad;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 24px;
+  position: relative;
+}
+
+.report-form h2::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background: #2980b9;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #004aad;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 10px rgba(41,128,185,0.3);
+  outline: none;
+}
+
+.image-preview {
+  margin-top: 10px;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+/* Submit button */
+.submit-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  background: #2980b9;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #1f6391;
+  transform: scale(1.05);
+}
+
+/* Login & Signup Forms */
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  padding: 30px 25px;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  animation: fadeInUp 0.8s ease forwards;
+  text-align: center;
+}
+
+.auth-container h1 {
+  color: #004aad;
+  margin-bottom: 25px;
+  font-size: 28px;
+  position: relative;
+}
+
+.auth-container h1::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background: #2980b9;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.auth-container form input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.auth-container form input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 10px rgba(41,128,185,0.3);
+  outline: none;
+}
+
+.auth-container form button {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  background: #2980b9;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-container form button:hover {
+  background: #1f6391;
+  transform: scale(1.05);
+}
+
+.auth-container p {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.auth-container p a {
+  color: #2980b9;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-container p a:hover {
+  text-decoration: underline;
+}
+
+/* Animations */
 @keyframes fadeInUp {
   from {opacity:0; transform:translateY(20px);}
   to {opacity:1; transform:translateY(0);}
+}
+
+@keyframes fadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
 }

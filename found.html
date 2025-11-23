@@ -7,25 +7,22 @@
 <link rel="stylesheet" href="lost-and-found-project.css">
 <script type="module" src="app.js" defer></script>
 </head>
-<body>
+<body id="found">
 <header>
-  <div>
-    <h1>SLSU Lost & Found</h1>
+  <div class="logo-container">
+    <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
+    <h1>Found Items</h1>
   </div>
+  <button id="logoutBtn" class="logout">Logout</button>
 </header>
 
 <nav>
   <a href="home.html">Home</a>
   <a href="lost.html">Lost</a>
-  <a href="found.html">Found</a>
-  <a href="report.html">Report</a>
 </nav>
 
 <div class="container">
-  <section id="found">
-    <h2>Found Items</h2>
-    <div id="foundList"></div>
-  </section>
+  <div id="foundList"></div>
 </div>
 </body>
 </html>
