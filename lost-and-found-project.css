@@ -11,8 +11,9 @@ body {
 header {
   background: linear-gradient(135deg,#004aad,#00b4d8);
   color: #fff;
-  padding: 20px 40px;
+  padding: 15px 20px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   position: relative;
@@ -40,17 +41,20 @@ header::after {
   display: flex;
   align-items: center;
   gap: 15px;
+  flex: 1 1 100%;
 }
 
 .logo {
-  width: 100px;
-  height: 100px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
 }
 
 header h1 {
-  margin: 0;
-  font-size: 28px;
+  margin: 10px 0 0 0;
+  font-size: 1.4rem;
+  flex: 1 1 100%;
+  text-align: center;
 }
 
 /* Logout button */
@@ -59,16 +63,19 @@ header h1 {
   font-size: 14px;
   border-radius: 8px;
   height: auto;
+  margin-top: 10px;
 }
 
 /* Navigation Bar */
 nav {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   background: linear-gradient(135deg, #004aad, #00b4d8);
-  padding: 12px 0;
+  padding: 10px 0;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  gap: 10px;
 }
 
 nav a {
@@ -76,11 +83,11 @@ nav a {
   text-decoration: none;
   font-weight: bold;
   font-size: 16px;
-  margin: 0 20px;
-  position: relative;
   padding: 8px 12px;
-  transition: all 0.3s ease;
   border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s ease;
+  flex: 1 1 120px;
 }
 
 nav a::after {
@@ -113,20 +120,19 @@ nav a.active {
 /* Report Form */
 .report-form {
   max-width: 450px;
-  margin: 40px auto;
+  margin: 30px auto;
   background: linear-gradient(145deg, #ffffff, #e0f7fa);
-  padding: 35px 30px;
+  padding: 25px 20px;
   border-radius: 15px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.15);
   animation: fadeInUp 0.8s ease forwards;
-  text-align: left;
 }
 
 .report-form h2 {
   color: #004aad;
   text-align: center;
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
   position: relative;
 }
 
@@ -143,12 +149,12 @@ nav a.active {
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   font-weight: bold;
   color: #004aad;
 }
@@ -157,7 +163,7 @@ nav a.active {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 12px 15px;
+  padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 14px;
@@ -194,8 +200,6 @@ nav a.active {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
   transition: all 0.3s ease;
 }
 
@@ -207,9 +211,9 @@ nav a.active {
 /* Login & Signup Forms */
 .auth-container {
   max-width: 400px;
-  margin: 50px auto;
+  margin: 30px auto;
   background: linear-gradient(145deg, #ffffff, #e0f7fa);
-  padding: 30px 25px;
+  padding: 25px 20px;
   border-radius: 15px;
   box-shadow: 0 12px 30px rgba(0,0,0,0.15);
   animation: fadeInUp 0.8s ease forwards;
@@ -218,8 +222,8 @@ nav a.active {
 
 .auth-container h1 {
   color: #004aad;
-  margin-bottom: 25px;
-  font-size: 28px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
   position: relative;
 }
 
@@ -237,13 +241,11 @@ nav a.active {
 
 .auth-container form input {
   width: 100%;
-  padding: 12px 15px;
-  margin-bottom: 15px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 14px;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
 }
 
 .auth-container form input:focus {
@@ -263,7 +265,6 @@ nav a.active {
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .auth-container form button:hover {
@@ -295,4 +296,38 @@ nav a.active {
 @keyframes fadeIn {
   from {opacity:0;}
   to {opacity:1;}
+}
+
+/* Responsive for mobile and tablets */
+@media screen and (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+  }
+
+  .logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  nav a {
+    flex: 1 1 100%;
+    margin: 5px 0;
+  }
+
+  .report-form, .auth-container {
+    margin: 20px 10px;
+    padding: 20px 15px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+    padding: 12px 0;
+  }
 }
