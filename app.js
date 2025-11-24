@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp, getDoc, doc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDRaaBNfbHWYb63RH2c2SHAtu5vS7o6_vw",
@@ -17,20 +17,29 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null;
+let currentUserData = null;
 
-onAuthStateChanged(auth, user => {
+const submitBtn = document.querySelector("#reportForm button[type='submit']");
+if (submitBtn) submitBtn.disabled = false;
+
+onAuthStateChanged(auth, async user => {
   if (user) {
     currentUser = user;
-    console.log("Auth: signed in as", user.email);
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      currentUserData = userDoc.exists() ? userDoc.data() : {};
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      currentUserData = {};
+    }
   } else {
-    console.log("Auth: no user, redirecting to login.html");
     window.location.href = "login.html";
   }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) logoutBtn.onclick = () => signOut(auth).then(() => window.location.href = "login.html");
+  logoutBtn?.addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
 
   const reportBtn = document.getElementById("reportBtn");
   const lostBtn = document.getElementById("lostBtn");
@@ -69,30 +78,22 @@ document.addEventListener("DOMContentLoaded", () => {
   lostBtn?.addEventListener("click", () => showSection("lost"));
   foundBtn?.addEventListener("click", () => showSection("found"));
 
-  if (reportFormContainer) showSection("report");
   if (document.body.id === "lost") showSection("lost");
-  if (document.body.id === "found") showSection("found");
+  else if (document.body.id === "found") showSection("found");
+  else if (reportFormContainer) showSection("report");
 
   async function loadItems(type, containerId) {
     const container = document.getElementById(containerId);
-    if (!container) {
-      console.warn("loadItems: container not found:", containerId);
-      return;
-    }
+    if (!container) return;
     container.innerHTML = "";
-    console.log("Loading items for", type);
 
     try {
       const q = query(collection(db, "items"), orderBy("timestamp", "desc"));
       const snapshot = await getDocs(q);
-      console.log("Firestore returned docs:", snapshot.size);
 
       snapshot.forEach(docSnap => {
         const item = docSnap.data();
-        console.log("doc:", docSnap.id, item);
-
-        if (!item.type) return;
-        if (String(item.type).toLowerCase() !== type) return;
+        if (!item.type || String(item.type).toLowerCase() !== type) return;
         if (item.status && item.status === "claimed") return;
 
         const div = document.createElement("div");
@@ -102,7 +103,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><b>Description:</b> ${item.desc ?? ""}</p>
           <p><b>Location:</b> ${item.location ?? ""}</p>
           <p><b>Date:</b> ${item.date ?? ""}</p>
-          <p><b>Reported By:</b> ${item.contact ?? ""}</p>
+          <p><b>Reporter:</b> ${item.reporterName ?? "Unknown"}</p>
+          <p><b>Student ID:</b> ${item.reporterStudentID ?? "N/A"}</p>
+          <p><b>Phone:</b> ${item.reporterPhone ?? "N/A"}</p>
+          <p><b>Email:</b> ${item.userEmail ?? "N/A"}</p>
+          ${item.imageURL ? `<img src="${item.imageURL}" class="reported-image">` : ""}
         `;
         container.appendChild(div);
         setTimeout(() => div.style.opacity = "1", 100);
@@ -114,56 +119,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
   reportForm?.addEventListener("submit", async e => {
     e.preventDefault();
-    if (!currentUser) {
-      alert("User not loaded yet. Please wait.");
-      console.log("Submit blocked: currentUser is null");
+    if (!currentUser || !currentUserData || !currentUserData.name || !currentUserData.studentID) {
+      alert("Please wait. User data not loaded.");
       return;
     }
 
-    const type = (document.getElementById("type")?.value ?? "").toLowerCase();
-    const name = document.getElementById("item")?.value ?? "";
-    const desc = document.getElementById("desc")?.value ?? "";
-    const location = document.getElementById("location")?.value ?? "";
-    const date = document.getElementById("date")?.value ?? "";
-    const contact = document.getElementById("contact")?.value ?? "";
+    const type = document.getElementById("type").value;
+    const name = document.getElementById("item").value;
+    const desc = document.getElementById("desc").value;
+    const location = document.getElementById("location").value;
+    const date = document.getElementById("date").value;
+    const contact = document.getElementById("contact").value;
 
-    console.log("Submitting item:", { type, name, desc, location, date, contact });
+    let imageURL = "";
+    const file = imageInput?.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        imageURL = e.target.result;
+        await saveReport();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await saveReport();
+    }
 
-    try {
-      await addDoc(collection(db, "items"), {
-        type, name, desc, location, date, contact,
-        status: "active",
-        userEmail: currentUser.email,
-        userId: currentUser.uid,
-        timestamp: Timestamp.now()
-      });
-      alert("Item reported successfully!");
-      reportForm.reset();
-      if (imagePreview) imagePreview.style.display = "none";
+    async function saveReport() {
+      try {
+        await addDoc(collection(db, "items"), {
+          type,
+          name,
+          desc,
+          location,
+          date,
+          contact,
+          status: "active",
+          userId: currentUser.uid,
+          userEmail: currentUserData.email ?? "",
+          reporterName: currentUserData.name ?? "Unknown",
+          reporterStudentID: currentUserData.studentID ?? "",
+          reporterPhone: currentUserData.phone ?? "",
+          imageURL,
+          timestamp: Timestamp.now()
+        });
 
-      if (document.body.id === "lost" && type === "lost") loadItems("lost", "lostList");
-      if (document.body.id === "found" && type === "found") loadItems("found", "foundList");
-      if (document.body.id === "" || document.body.id === undefined) {
+        alert("Item reported successfully!");
+        reportForm.reset();
+        if (imagePreview) imagePreview.style.display = "none";
+
         if (type === "lost" && lostList) loadItems("lost", "lostList");
         if (type === "found" && foundList) loadItems("found", "foundList");
+
+      } catch (err) {
+        console.error("Error reporting item:", err);
+        alert("Error reporting: " + err.message);
       }
-    } catch (err) {
-      console.error("Error reporting item:", err);
-      alert("Error reporting item: " + (err.message || err));
     }
   });
 
   imageInput?.addEventListener("change", () => {
-    const file = imageInput.files?.[0];
-    if (file && imagePreview) {
+    const file = imageInput.files[0];
+    if (file) {
       const reader = new FileReader();
       reader.onload = e => {
         imagePreview.src = e.target.result;
         imagePreview.style.display = "block";
       };
       reader.readAsDataURL(file);
-    } else if (imagePreview) {
-      imagePreview.style.display = "none";
+    } else {
+      if (imagePreview) imagePreview.style.display = "none";
     }
   });
 });

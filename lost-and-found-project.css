@@ -163,11 +163,12 @@ nav a.active {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 0; /* matches submit button height */
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 14px;
   box-sizing: border-box;
+  text-align: center;
   transition: all 0.3s ease;
 }
 
@@ -241,11 +242,12 @@ nav a.active {
 
 .auth-container form input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 0; /* match submit button height */
   margin-bottom: 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 14px;
+  text-align: center;
 }
 
 .auth-container form input:focus {
@@ -353,6 +355,15 @@ nav a.active {
   margin: 5px 0;
   font-size: 14px;
   color: #333;
+}
+
+.card img {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  display: block;
+  margin: 10px 0;
+  border-radius: 8px;
 }
 
 .card:hover {
