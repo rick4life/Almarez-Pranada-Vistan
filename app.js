@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   reportForm?.addEventListener("submit", async e => {
     e.preventDefault();
-    if (!currentUser || !currentUserData || !currentUserData.name || !currentUserData.studentID) {
+    if (!currentUser || !currentUserData || !currentUserData.name) {
       alert("Please wait. User data not loaded.");
       return;
     }
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const desc = document.getElementById("desc").value;
     const location = document.getElementById("location").value;
     const date = document.getElementById("date").value;
-    const contact = document.getElementById("contact").value;
+    const contact = document.getElementById("contact").value; // optional now
 
     let imageURL = "";
     const file = imageInput?.files[0];
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
           desc,
           location,
           date,
-          contact,
+          contact: contact || "", // optional
           status: "active",
           userId: currentUser.uid,
           userEmail: currentUserData.email ?? "",
