@@ -3,46 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Profile - SLSU Lost & Found</title>
+<title>My Profile</title>
 <link rel="stylesheet" href="lost-and-found-project.css">
 <script type="module" src="app.js" defer></script>
 </head>
-<body id="profile">
-<header>
-  <div class="logo-container">
-    <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
+<body>
+
+<div id="sidebar" class="sidebar">
+  <img src="SLSU.jpg" alt="SLSU Logo" class="logo-small">
+  <ul>
+    <li><a href="home.html"><span class="icon">🏠</span><span class="label">Home</span></a></li>
+    <li><a href="lost.html"><span class="icon">🔍</span><span class="label">Lost Items</span></a></li>
+    <li><a href="found.html"><span class="icon">📦</span><span class="label">Found Items</span></a></li>
+    <li><a href="profile.html"><span class="icon">👤</span><span class="label">Profile</span></a></li>
+    <li><button id="logoutBtn"><span class="icon">🚪</span><span class="label">Logout</span></button></li>
+  </ul>
+</div>
+
+<div class="main-content">
+  <header>
     <h1>My Profile</h1>
-  </div>
-  <button id="dashboardBtn" class="floating-btn-header">☰</button>
-</header>
+  </header>
 
-<div class="container">
-  <div class="profile-card">
-    <h2 id="profileName">Name: </h2>
-    <p id="profileStudentID">Student ID: </p>
-    <p id="profilePhone">Phone: </p>
-    <p id="profileEmail">Email: </p>
-  </div>
-</div>
-
-<!-- Dashboard Modal -->
-<div id="dashboardModal" class="dashboard-modal">
-  <div class="dashboard-content">
-    <span id="closeDashboard" class="close-btn">&times;</span>
-    <h2>Quick Menu</h2>
-    <ul>
-      <li><a href="home.html">Home</a></li>
-      <li><a href="lost.html">Lost Items</a></li>
-      <li><a href="found.html">Found Items</a></li>
-      <li><button id="logoutBtn" class="logout">Logout</button></li>
-    </ul>
-
-    <h3>Lost Items</h3>
-    <div id="modalLostList"></div>
-
-    <h3>Found Items</h3>
-    <div id="modalFoundList"></div>
+  <div class="container">
+    <div class="profile-card">
+      <h2 id="profileName">Name: </h2>
+      <p id="profileStudentID">Student ID: </p>
+      <p id="profilePhone">Phone: </p>
+      <p id="profileEmail">Email: </p>
+    </div>
   </div>
 </div>
+
 </body>
 </html>

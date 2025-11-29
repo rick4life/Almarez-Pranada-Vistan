@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SLSU Lost & Found - Home</title>
-  <link rel="stylesheet" href="lost-and-found-project.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLSU Lost & Found - Home</title>
+<link rel="stylesheet" href="lost-and-found-project.css">
+<script type="module" src="app.js" defer></script>
 </head>
 <body>
-  <!-- Header -->
+
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar">
+  <img src="SLSU.jpg" alt="SLSU Logo" class="logo-small">
+  <ul>
+    <li><a href="home.html"><span class="icon">🏠</span><span class="label">Home</span></a></li>
+    <li><a href="lost.html"><span class="icon">🔍</span><span class="label">Lost Items</span></a></li>
+    <li><a href="found.html"><span class="icon">📦</span><span class="label">Found Items</span></a></li>
+    <li><a href="profile.html"><span class="icon">👤</span><span class="label">Profile</span></a></li>
+    <li><button id="logoutBtn"><span class="icon">🚪</span><span class="label">Logout</span></button></li>
+  </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
   <header>
-    <div class="logo-container">
-      <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
-      <h1>Welcome to SLSU Lost & Found Portal</h1>
-    </div>
-    <button id="dashboardBtn" class="floating-btn-header">☰</button>
+    <h1>Welcome to SLSU Lost & Found Portal</h1>
   </header>
 
   <!-- Report Form Section -->
   <section id="reportFormContainer">
     <form id="reportForm" class="report-form">
       <h2>Report an Item</h2>
-
       <div class="form-group">
         <label for="type">Report Type</label>
         <select id="type" required>
@@ -80,21 +90,7 @@
   <div id="foundList" style="display:none;">
     <h2 style="text-align:center; margin-top:20px;">Found Items</h2>
   </div>
+</div>
 
-  <!-- Dashboard Modal -->
-  <div id="dashboardModal" class="dashboard-modal">
-    <div class="dashboard-content">
-      <span id="closeDashboard" class="close-btn">&times;</span>
-      <h2>Quick Menu</h2>
-      <ul>
-        <li><a href="lost.html">Lost Items</a></li>
-        <li><a href="found.html">Found Items</a></li>
-        <li><a href="profile.html">Profile</a></li>
-        <li><button id="logoutBtn" class="logout">Logout</button></li>
-      </ul>
-    </div>
-  </div>
-
-  <script type="module" src="app.js"></script>
 </body>
 </html>

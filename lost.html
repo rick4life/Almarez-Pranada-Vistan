@@ -7,33 +7,26 @@
 <link rel="stylesheet" href="lost-and-found-project.css">
 <script type="module" src="app.js" defer></script>
 </head>
-<body id="lost">
+<body>
 
-<!-- Header -->
-<header>
-  <div class="logo-container">
-    <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
-    <h1>Lost Items</h1>
-  </div>
-  <button id="dashboardBtn" class="floating-btn-header">☰</button>
-</header>
-
-<!-- Lost Items List -->
-<div class="container">
-  <div id="lostList"></div>
+<div id="sidebar" class="sidebar">
+  <img src="SLSU.jpg" alt="SLSU Logo" class="logo-small">
+  <ul>
+    <li><a href="home.html"><span class="icon">🏠</span><span class="label">Home</span></a></li>
+    <li><a href="lost.html"><span class="icon">🔍</span><span class="label">Lost Items</span></a></li>
+    <li><a href="found.html"><span class="icon">📦</span><span class="label">Found Items</span></a></li>
+    <li><a href="profile.html"><span class="icon">👤</span><span class="label">Profile</span></a></li>
+    <li><button id="logoutBtn"><span class="icon">🚪</span><span class="label">Logout</span></button></li>
+  </ul>
 </div>
 
-<!-- Dashboard Modal -->
-<div id="dashboardModal" class="dashboard-modal">
-  <div class="dashboard-content">
-    <span id="closeDashboard" class="close-btn">&times;</span>
-    <h2>Quick Menu</h2>
-    <ul>
-      <li><a href="lost.html">Lost Items</a></li>
-      <li><a href="found.html">Found Items</a></li>
-      <li><a href="profile.html">Profile</a></li>
-      <li><button id="logoutBtn" class="logout">Logout</button></li>
-    </ul>
+<div class="main-content">
+  <header>
+    <h1>Lost Items</h1>
+  </header>
+
+  <div class="container">
+    <div id="lostList"></div>
   </div>
 </div>
 
