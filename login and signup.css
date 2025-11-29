@@ -1,0 +1,95 @@
+/* General body styling for auth pages */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f0f4f8;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Login & Signup container */
+.auth-container {
+  max-width: 400px;
+  margin: 30px auto;
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  padding: 25px 20px;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  animation: fadeInUp 0.8s ease forwards;
+  text-align: center;
+}
+
+.auth-container h1 {
+  color: #004aad;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  position: relative;
+}
+
+.auth-container h1::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background: #2980b9;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.auth-container form input {
+  width: 100%;
+  padding: 14px 0;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-container form input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 10px rgba(41,128,185,0.3);
+  outline: none;
+}
+
+.auth-container form button {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  background: #2980b9;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-container form button:hover {
+  background: #1f6391;
+  transform: scale(1.05);
+}
+
+.auth-container p {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.auth-container p a {
+  color: #2980b9;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-container p a:hover {
+  text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {opacity:0; transform:translateY(20px);}
+  to {opacity:1; transform:translateY(0);}
+}

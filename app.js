@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp, getDoc, doc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyDRaaBNfbHWYb63RH2c2SHAtu5vS7o6_vw",
   authDomain: "slsu-lost-found.firebaseapp.com",
@@ -19,12 +20,35 @@ const db = getFirestore(app);
 let currentUser = null;
 let currentUserData = null;
 
-const submitBtn = document.querySelector("#reportForm button[type='submit']");
-if (submitBtn) submitBtn.disabled = false;
+document.addEventListener("DOMContentLoaded", () => {
+  // --- DOM Elements ---
+  const dashboardBtn = document.getElementById("dashboardBtn");
+  const dashboardModal = document.getElementById("dashboardModal");
+  const closeDashboard = document.getElementById("closeDashboard");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const modalLostList = document.getElementById("modalLostList");
+  const modalFoundList = document.getElementById("modalFoundList");
 
-onAuthStateChanged(auth, async user => {
-  if (user) {
+  const profileName = document.getElementById("profileName");
+  const profileStudentID = document.getElementById("profileStudentID");
+  const profilePhone = document.getElementById("profilePhone");
+  const profileEmail = document.getElementById("profileEmail");
+
+  const reportForm = document.getElementById("reportForm");
+  const imageInput = document.getElementById("imageUpload");
+  const imagePreview = document.getElementById("imagePreview");
+
+  const lostList = document.getElementById("lostList");
+  const foundList = document.getElementById("foundList");
+
+  // --- Auth State ---
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
     currentUser = user;
+
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       currentUserData = userDoc.exists() ? userDoc.data() : {};
@@ -32,56 +56,121 @@ onAuthStateChanged(auth, async user => {
       console.error("Error fetching user data:", err);
       currentUserData = {};
     }
-  } else {
-    window.location.href = "login.html";
+
+    // Fill profile page if present
+    if (profileName) profileName.textContent = "Name: " + (currentUserData.name ?? "Unknown");
+    if (profileStudentID) profileStudentID.textContent = "Student ID: " + (currentUserData.studentID ?? "N/A");
+    if (profilePhone) profilePhone.textContent = "Phone: " + (currentUserData.phone ?? "N/A");
+    if (profileEmail) profileEmail.textContent = "Email: " + (currentUserData.email ?? "N/A");
+
+    // Load page items if lost/found page
+    if (lostList) loadItems("lost", "lostList");
+    if (foundList) loadItems("found", "foundList");
+  });
+
+  // --- Logout ---
+  logoutBtn?.addEventListener("click", () => {
+    signOut(auth).then(() => window.location.href = "login.html");
+  });
+
+  // --- Dashboard ---
+  dashboardBtn?.addEventListener("click", () => {
+    if (!currentUserData) return;
+    dashboardModal.style.display = "block";
+
+    // Load items inside modal
+    if (modalLostList) loadItems("lost", "modalLostList");
+    if (modalFoundList) loadItems("found", "modalFoundList");
+  });
+
+  closeDashboard?.addEventListener("click", () => {
+    dashboardModal.style.display = "none";
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === dashboardModal) dashboardModal.style.display = "none";
+  });
+
+  // --- Image Preview ---
+  if (imageInput) {
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file && imagePreview) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else if (imagePreview) {
+        imagePreview.style.display = "none";
+      }
+    });
   }
-});
 
-document.addEventListener("DOMContentLoaded", () => {
-  const logoutBtn = document.getElementById("logoutBtn");
-  logoutBtn?.addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
+  // --- Report Submission ---
+  if (reportForm) {
+    reportForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUserData || !currentUserData.name) {
+        alert("Please wait. User data not loaded.");
+        return;
+      }
 
-  const reportBtn = document.getElementById("reportBtn");
-  const lostBtn = document.getElementById("lostBtn");
-  const foundBtn = document.getElementById("foundBtn");
-  const reportFormContainer = document.getElementById("reportFormContainer");
-  const lostList = document.getElementById("lostList");
-  const foundList = document.getElementById("foundList");
-  const reportForm = document.getElementById("reportForm");
-  const imageInput = document.getElementById("imageUpload");
-  const imagePreview = document.getElementById("imagePreview");
+      const type = document.getElementById("type").value;
+      const name = document.getElementById("item").value;
+      const desc = document.getElementById("desc").value;
+      const location = document.getElementById("location").value;
+      const date = document.getElementById("date").value;
+      const contact = document.getElementById("contact").value;
 
-  function showSection(section) {
-    if (reportFormContainer) reportFormContainer.style.display = "none";
-    if (lostList) lostList.style.display = "none";
-    if (foundList) foundList.style.display = "none";
+      let imageURL = "";
+      const file = imageInput?.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          imageURL = e.target.result;
+          await saveReport();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        await saveReport();
+      }
 
-    reportBtn?.classList.remove("active");
-    lostBtn?.classList.remove("active");
-    foundBtn?.classList.remove("active");
+      async function saveReport() {
+        try {
+          await addDoc(collection(db, "items"), {
+            type,
+            name,
+            desc,
+            location,
+            date,
+            contact: contact || "",
+            status: "active",
+            userId: currentUser.uid,
+            userEmail: currentUserData.email ?? "",
+            reporterName: currentUserData.name ?? "Unknown",
+            reporterStudentID: currentUserData.studentID ?? "",
+            reporterPhone: currentUserData.phone ?? "",
+            imageURL,
+            timestamp: Timestamp.now()
+          });
 
-    if (section === "report" && reportFormContainer) {
-      reportFormContainer.style.display = "block";
-      reportBtn?.classList.add("active");
-    } else if (section === "lost" && lostList) {
-      lostList.style.display = "block";
-      lostBtn?.classList.add("active");
-      loadItems("lost", "lostList");
-    } else if (section === "found" && foundList) {
-      foundList.style.display = "block";
-      foundBtn?.classList.add("active");
-      loadItems("found", "foundList");
-    }
+          alert("Item reported successfully!");
+          reportForm.reset();
+          if (imagePreview) imagePreview.style.display = "none";
+
+          if (type === "lost" && lostList) loadItems("lost", "lostList");
+          if (type === "found" && foundList) loadItems("found", "foundList");
+        } catch (err) {
+          console.error("Error reporting item:", err);
+          alert("Error reporting: " + err.message);
+        }
+      }
+    });
   }
 
-  reportBtn?.addEventListener("click", () => showSection("report"));
-  lostBtn?.addEventListener("click", () => showSection("lost"));
-  foundBtn?.addEventListener("click", () => showSection("found"));
-
-  if (document.body.id === "lost") showSection("lost");
-  else if (document.body.id === "found") showSection("found");
-  else if (reportFormContainer) showSection("report");
-
+  // --- Function to load items ---
   async function loadItems(type, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -116,78 +205,4 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error loading items:", err);
     }
   }
-
-  reportForm?.addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!currentUser || !currentUserData || !currentUserData.name) {
-      alert("Please wait. User data not loaded.");
-      return;
-    }
-
-    const type = document.getElementById("type").value;
-    const name = document.getElementById("item").value;
-    const desc = document.getElementById("desc").value;
-    const location = document.getElementById("location").value;
-    const date = document.getElementById("date").value;
-    const contact = document.getElementById("contact").value; // optional now
-
-    let imageURL = "";
-    const file = imageInput?.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        imageURL = e.target.result;
-        await saveReport();
-      };
-      reader.readAsDataURL(file);
-    } else {
-      await saveReport();
-    }
-
-    async function saveReport() {
-      try {
-        await addDoc(collection(db, "items"), {
-          type,
-          name,
-          desc,
-          location,
-          date,
-          contact: contact || "", // optional
-          status: "active",
-          userId: currentUser.uid,
-          userEmail: currentUserData.email ?? "",
-          reporterName: currentUserData.name ?? "Unknown",
-          reporterStudentID: currentUserData.studentID ?? "",
-          reporterPhone: currentUserData.phone ?? "",
-          imageURL,
-          timestamp: Timestamp.now()
-        });
-
-        alert("Item reported successfully!");
-        reportForm.reset();
-        if (imagePreview) imagePreview.style.display = "none";
-
-        if (type === "lost" && lostList) loadItems("lost", "lostList");
-        if (type === "found" && foundList) loadItems("found", "foundList");
-
-      } catch (err) {
-        console.error("Error reporting item:", err);
-        alert("Error reporting: " + err.message);
-      }
-    }
-  });
-
-  imageInput?.addEventListener("change", () => {
-    const file = imageInput.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = "block";
-      };
-      reader.readAsDataURL(file);
-    } else {
-      if (imagePreview) imagePreview.style.display = "none";
-    }
-  });
 });

@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Found Items</title>
+<title>My Profile - SLSU Lost & Found</title>
 <link rel="stylesheet" href="lost-and-found-project.css">
 <script type="module" src="app.js" defer></script>
 </head>
-<body id="found">
-
-<!-- Header -->
+<body id="profile">
 <header>
   <div class="logo-container">
     <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
-    <h1>Found Items</h1>
+    <h1>My Profile</h1>
   </div>
   <button id="dashboardBtn" class="floating-btn-header">☰</button>
 </header>
 
-
-<!-- Found Items List -->
 <div class="container">
-  <div id="foundList"></div>
+  <div class="profile-card">
+    <h2 id="profileName">Name: </h2>
+    <p id="profileStudentID">Student ID: </p>
+    <p id="profilePhone">Phone: </p>
+    <p id="profileEmail">Email: </p>
+  </div>
 </div>
 
 <!-- Dashboard Modal -->
@@ -30,13 +31,18 @@
     <span id="closeDashboard" class="close-btn">&times;</span>
     <h2>Quick Menu</h2>
     <ul>
+      <li><a href="home.html">Home</a></li>
       <li><a href="lost.html">Lost Items</a></li>
       <li><a href="found.html">Found Items</a></li>
-      <li><a href="profile.html">Profile</a></li>
       <li><button id="logoutBtn" class="logout">Logout</button></li>
     </ul>
+
+    <h3>Lost Items</h3>
+    <div id="modalLostList"></div>
+
+    <h3>Found Items</h3>
+    <div id="modalFoundList"></div>
   </div>
 </div>
-
 </body>
 </html>

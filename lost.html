@@ -8,21 +8,34 @@
 <script type="module" src="app.js" defer></script>
 </head>
 <body id="lost">
+
+<!-- Header -->
 <header>
   <div class="logo-container">
     <img src="SLSU.jpg" alt="SLSU Logo" class="logo">
     <h1>Lost Items</h1>
   </div>
-  <button id="logoutBtn" class="logout">Logout</button>
+  <button id="dashboardBtn" class="floating-btn-header">☰</button>
 </header>
 
-<nav>
-  <a href="home.html">Home</a>
-  <a href="found.html">Found</a>
-</nav>
-
+<!-- Lost Items List -->
 <div class="container">
   <div id="lostList"></div>
 </div>
+
+<!-- Dashboard Modal -->
+<div id="dashboardModal" class="dashboard-modal">
+  <div class="dashboard-content">
+    <span id="closeDashboard" class="close-btn">&times;</span>
+    <h2>Quick Menu</h2>
+    <ul>
+      <li><a href="lost.html">Lost Items</a></li>
+      <li><a href="found.html">Found Items</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><button id="logoutBtn" class="logout">Logout</button></li>
+    </ul>
+  </div>
+</div>
+
 </body>
 </html>
