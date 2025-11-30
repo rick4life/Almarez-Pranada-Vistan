@@ -236,7 +236,7 @@ header h1 {
   transform: scale(1.05);
 }
 
-/* Card styling for lost/found items */
+/* Card styling for dashboard items */
 .card {
   background: linear-gradient(145deg, #ffffff, #e0f7fa);
   border-radius: 12px;
@@ -287,4 +287,87 @@ header h1 {
     margin: 20px 10px;
     padding: 20px 15px;
   }
+}
+
+/* Dashboard horizontal layout */
+#dashboard-sections {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+#dashboard-sections section {
+  flex: 0 0 30%;
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#dashboard-sections section h2 {
+  text-align: center;
+  color: #004aad;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  position: relative;
+}
+
+#dashboard-sections section h2::after {
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 3px;
+  background: #2980b9;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+/* Cards as clickable buttons */
+#dashboard-sections .card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#dashboard-sections .card:hover {
+  background: linear-gradient(145deg, #e0f7fa, #ffffff);
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Lost/Found table view */
+.dashboard-table {
+  display: grid;
+  grid-template-columns: 2fr 3fr 2fr 1.5fr 2fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: linear-gradient(145deg, #ffffff, #e0f7fa);
+  border-radius: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-table:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.dashboard-table-header {
+  display: grid;
+  grid-template-columns: 2fr 3fr 2fr 1.5fr 2fr 1fr;
+  font-weight: bold;
+  background: #004aad;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }

@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Found Items</title>
+<title>User Dashboard - SLSU Lost & Found</title>
 <link rel="stylesheet" href="lost-and-found-project.css">
-<script type="module" src="app.js" defer></script>
+<script type="module" src="dashboard.js" defer></script>
 </head>
-<body>
+<body id="dashboard">
 
+<!-- Sidebar -->
 <div id="sidebar" class="sidebar">
   <img src="SLSU.jpg" alt="SLSU Logo" class="logo-small">
   <ul>
@@ -21,14 +22,33 @@
   </ul>
 </div>
 
+<!-- Main Content -->
 <div class="main-content">
   <header>
-    <h1>Found Items</h1>
+    <h1>Welcome to SLSU Lost & Found Portal</h1>
   </header>
 
-  <div class="container">
-    <div id="foundList"></div>
+  <main class="main-content">
+  <h1>User Dashboard</h1>
+  <div id="dashboard-sections">
+    <section>
+      <h2>My Claimed Items</h2>
+      <div id="myClaimsList"></div>
+    </section>
+
+    <section>
+      <h2>Other Users' Claimed Items</h2>
+      <div id="othersClaimsList"></div>
+    </section>
+
+    <section>
+      <h2>Pending Claims</h2>
+      <div id="pendingClaimsList"></div>
+    </section>
   </div>
+</main>
+
+
 </div>
 
 </body>
