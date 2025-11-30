@@ -49,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sidebar?.addEventListener("mouseover", () => sidebar.classList.add("expanded"));
   sidebar?.addEventListener("mouseout", () => sidebar.classList.remove("expanded"));
 
-  // Auth state
   onAuthStateChanged(auth, async (user) => {
     if (!user) return window.location.href = "login.html";
     currentUser = user;
@@ -57,6 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       currentUserData = userDoc.exists() ? userDoc.data() : {};
+      // ensure email/phone/name fields exist on currentUserData if set on auth
+      if (!currentUserData.email && user.email) currentUserData.email = user.email;
     } catch (err) {
       console.error(err);
       currentUserData = {};
@@ -70,9 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(lostList) loadItems("lost", "lostList");
     if(foundList) loadItems("found", "foundList");
 
-    if(myClaimsList || othersClaimsList || pendingClaimsList) {
-      loadDashboard();
-    }
+    if(myClaimsList || othersClaimsList || pendingClaimsList) loadDashboard();
 
     loadNotifications();
   });
@@ -113,9 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await saveReport();
         };
         reader.readAsDataURL(file);
-      } else {
-        await saveReport();
-      }
+      } else await saveReport();
 
       async function saveReport() {
         try {
@@ -153,6 +150,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper: safe update with error handling
+  async function safeUpdateItem(id, updates) {
+    if (!id) {
+      alert("Error: missing item id.");
+      console.error("safeUpdateItem called with missing id", updates);
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "items", id), updates);
+    } catch (err) {
+      console.error("Failed to update item:", err);
+      alert("Failed to update item: " + (err.message || err));
+      throw err;
+    }
+  }
+
   // --- Load Items ---
   async function loadItems(type, containerId) {
     const container = document.getElementById(containerId);
@@ -163,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const q = query(collection(db, "items"), orderBy("timestamp", "desc"));
       const snapshot = await getDocs(q);
 
-      // Header
       const header = document.createElement("div");
       header.className = "dashboard-table-header";
       header.innerHTML = `
@@ -178,61 +190,81 @@ document.addEventListener("DOMContentLoaded", () => {
       container.appendChild(header);
 
       snapshot.forEach(docSnap => {
-        const item = docSnap.data();
+        const item = docSnap.data() ?? {};
+        // Ensure id is always present
         item.id = docSnap.id;
+
         if(!item.type || String(item.type).toLowerCase() !== type) return;
 
         const row = document.createElement("div");
         row.className = "dashboard-table";
 
-        const isClaimable = !item.status || item.status === "active";
         let actionHTML = "";
-
-        if(isClaimable) actionHTML = `<button class="claimBtnUser">Claim</button>`;
-        else if(item.status === "pending") {
-          if(currentUserData.role === "admin") {
-            actionHTML = `<button class="approveBtn">Approve</button> <button class="rejectBtn">Reject</button>`;
-          } else actionHTML = "Pending approval";
+        if(!item.status || item.status === "active") {
+          if(currentUserData?.role !== "admin") actionHTML = `<button class="claimBtnUser" data-id="${item.id}">Claim</button>`;
+          else actionHTML = "Item active";
+        } else if(item.status === "pending") {
+          if(item.claimedBy === currentUser.uid) actionHTML = "Claim submitted. Waiting for admin approval";
+          else if(currentUserData?.role === "admin") actionHTML = `<button class="approveBtn" data-id="${item.id}">Approve</button> <button class="rejectBtn" data-id="${item.id}">Reject</button>`;
+          else actionHTML = "Pending approval";
+        } else if(item.status === "approved") {
+          actionHTML = item.claimedBy === currentUser.uid ? "Claimed by you" : "Claimed";
         }
-        else if(item.status === "approved") actionHTML = "Claimed";
 
         row.innerHTML = `
-          <div>${item.name ?? ""}</div>
-          <div>${item.desc ?? ""}</div>
-          <div>${item.location ?? ""}</div>
-          <div>${item.date ?? ""}</div>
-          <div>${item.reporterName ?? "Unknown"}</div>
+          <div>${escapeHtml(item.name ?? "")}</div>
+          <div>${escapeHtml(item.desc ?? "")}</div>
+          <div>${escapeHtml(item.location ?? "")}</div>
+          <div>${escapeHtml(item.date ?? "")}</div>
+          <div>${escapeHtml(item.reporterName ?? "Unknown")}</div>
           <div>${item.imageURL ? `<img src="${item.imageURL}" style="max-width:100px; max-height:80px; border-radius:6px;">` : ""}</div>
           <div>${actionHTML}</div>
         `;
 
         container.appendChild(row);
 
-        if(isClaimable) {
-          row.querySelector(".claimBtnUser")?.addEventListener("click", async () => {
-            await updateDoc(doc(db, "items", docSnap.id), {
+        // Claim button inside table: stop propagation so row click doesn't open modal
+        row.querySelector(".claimBtnUser")?.addEventListener("click", async (e) => {
+          e.stopPropagation(); // Prevent row click from firing
+          const btn = e.currentTarget;
+          const id = btn?.dataset?.id;
+          if (!id) { alert("Error: missing item id for claim."); return; }
+
+          try {
+            await safeUpdateItem(id, {
               status: "pending",
               claimedBy: currentUser.uid,
-              claimedByName: currentUserData.name ?? "User",
+              claimedByName: currentUserData?.name ?? "User",
               claimedAt: Timestamp.now()
             });
             alert("Claim submitted! Waiting for admin approval.");
             loadItems(type, containerId);
             loadDashboard();
             loadNotifications();
-          });
-        }
+          } catch (err) {
+            // error already handled in safeUpdateItem
+          }
+        });
 
-        if(currentUserData.role === "admin" && item.status === "pending") {
-          row.querySelector(".approveBtn")?.addEventListener("click", async () => {
-            await updateDoc(doc(db, "items", docSnap.id), { status: "approved" });
+        row.querySelector(".approveBtn")?.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.dataset.id;
+          if (!id) { alert("Error: missing item id for approve."); return; }
+          try {
+            await safeUpdateItem(id, { status: "approved" });
             alert("Claim approved!");
             loadItems(type, containerId);
             loadDashboard();
             loadNotifications();
-          });
-          row.querySelector(".rejectBtn")?.addEventListener("click", async () => {
-            await updateDoc(doc(db, "items", docSnap.id), {
+          } catch (err) {}
+        });
+
+        row.querySelector(".rejectBtn")?.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.dataset.id;
+          if (!id) { alert("Error: missing item id for reject."); return; }
+          try {
+            await safeUpdateItem(id, {
               status: "active",
               claimedBy: null,
               claimedByName: "",
@@ -242,42 +274,38 @@ document.addEventListener("DOMContentLoaded", () => {
             loadItems(type, containerId);
             loadDashboard();
             loadNotifications();
-          });
-        }
+          } catch (err) {}
+        });
 
+        // Only open modal if click is NOT on a button (stopPropagation above prevents buttons)
         row.addEventListener("click", () => showModal(item));
         setTimeout(() => row.classList.add("show"), 100);
       });
-    } catch (err) {
-      console.error(err);
-    }
+    } catch(err) { console.error(err); }
   }
 
-  // --- Dashboard ---
+  // --- Dashboard and Modal and Notifications ---
   async function loadDashboard() {
     try {
       const snapshot = await getDocs(collection(db, "items"));
       let myClaims = [], othersClaims = [], pendingClaims = [];
 
       snapshot.forEach(docSnap => {
-        const item = docSnap.data();
-        item.id = docSnap.id;
+        const item = docSnap.data() ?? {};
+        item.id = docSnap.id; // ensure id
+        // Normalize status and claimedBy fields if missing
+        const status = item.status ?? "active";
+        const claimedBy = item.claimedBy ?? null;
 
-        if(item.claimedBy === currentUser.uid && item.status === "pending") {
-          pendingClaims.push(item);
-        } else if(item.claimedBy === currentUser.uid && item.status === "approved") {
-          myClaims.push(item);
-        } else if(item.status === "approved" && item.claimedBy !== currentUser.uid) {
-          othersClaims.push(item);
-        }
+        if(claimedBy === currentUser.uid && status === "pending") pendingClaims.push(item);
+        else if(claimedBy === currentUser.uid && status === "approved") myClaims.push(item);
+        else if(status === "approved" && claimedBy && claimedBy !== currentUser.uid) othersClaims.push(item);
       });
 
       renderItems(myClaims, "myClaimsList");
       renderItems(othersClaims, "othersClaimsList");
       renderItems(pendingClaims, "pendingClaimsList");
-    } catch(err) {
-      console.error(err);
-    }
+    } catch(err) { console.error(err); }
   }
 
   function renderItems(items, containerId) {
@@ -286,16 +314,22 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = "";
 
     items.forEach(item => {
+      // safety: ensure id present
+      if (!item || !item.id) {
+        console.warn("renderItems: item missing id, skipping", item);
+        return;
+      }
+
       const div = document.createElement("div");
       div.className = "card";
       div.innerHTML = `
-        <h3>${item.name}</h3>
-        <p><b>Type:</b> ${item.type}</p>
-        <p><b>Description:</b> ${item.desc}</p>
-        <p><b>Location:</b> ${item.location}</p>
-        <p><b>Date:</b> ${item.date}</p>
-        <p><b>Reporter:</b> ${item.reporterName}</p>
-        <p><b>Status:</b> ${item.status}</p>
+        <h3>${escapeHtml(item.name)}</h3>
+        <p><b>Type:</b> ${escapeHtml(item.type)}</p>
+        <p><b>Description:</b> ${escapeHtml(item.desc)}</p>
+        <p><b>Location:</b> ${escapeHtml(item.location)}</p>
+        <p><b>Date:</b> ${escapeHtml(item.date)}</p>
+        <p><b>Reporter:</b> ${escapeHtml(item.reporterName)}</p>
+        <p><b>Status:</b> ${escapeHtml(item.status)}</p>
       `;
       div.addEventListener("click", () => showModal(item));
       container.appendChild(div);
@@ -303,8 +337,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Modal ---
   function showModal(item) {
+    // Safety checks: ensure item and id exist
+    if (!item || !item.id) {
+      console.error("showModal called with invalid item:", item);
+      alert("Error: Unable to open item details (missing id).");
+      return;
+    }
+
+    // Remove existing modal
     const existing = document.getElementById("itemModal");
     if(existing) existing.remove();
 
@@ -332,27 +373,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let actionHTML = "";
     if(!item.status || item.status === "active") {
-      actionHTML = `<button id="claimBtnModal" style="margin-top:10px;padding:10px 20px;background:#2980b9;color:white;border:none;border-radius:8px;cursor:pointer;">Claim</button>`;
-    } else if(currentUserData.role === "admin" && item.status === "pending") {
-      actionHTML = `
-        <div style="display:flex;gap:10px;margin-top:10px;">
-          <button id="approveBtnModal" style="padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;">Approve</button>
-          <button id="rejectBtnModal" style="padding:10px 20px;background:#c0392b;color:white;border:none;border-radius:8px;cursor:pointer;">Reject</button>
-        </div>
-      `;
-    }
+      if(currentUserData?.role !== "admin") actionHTML = `<button id="claimBtnModal" data-id="${item.id}" style="margin-top:10px;padding:10px 20px;background:#2980b9;color:white;border:none;border-radius:8px;cursor:pointer;">Claim</button>`;
+      else actionHTML = "Item active";
+    } else if(item.status === "pending") {
+      if(item.claimedBy === currentUser.uid) actionHTML = "Claim submitted. Waiting for admin approval";
+      else if(currentUserData?.role === "admin") actionHTML = `<div style="display:flex;gap:10px;margin-top:10px;">
+          <button id="approveBtnModal" data-id="${item.id}" style="padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:8px;cursor:pointer;">Approve</button>
+          <button id="rejectBtnModal" data-id="${item.id}" style="padding:10px 20px;background:#c0392b;color:white;border:none;border-radius:8px;cursor:pointer;">Reject</button>
+        </div>`;
+      else actionHTML = "Pending approval";
+    } else if(item.status === "approved") actionHTML = item.claimedBy === currentUser.uid ? "Claimed by you" : "Claimed";
 
     content.innerHTML = `
-      <h2>${item.name}</h2>
-      <p><b>Type:</b> ${item.type}</p>
-      <p><b>Description:</b> ${item.desc}</p>
-      <p><b>Location:</b> ${item.location}</p>
-      <p><b>Date:</b> ${item.date}</p>
-      <p><b>Reporter:</b> ${item.reporterName}</p>
-      <p><b>Student ID:</b> ${item.reporterStudentID ?? "N/A"}</p>
-      <p><b>Phone:</b> ${item.reporterPhone ?? "N/A"}</p>
-      <p><b>Email:</b> ${item.userEmail ?? "N/A"}</p>
-      <p><b>Status:</b> ${item.status}</p>
+      <h2>${escapeHtml(item.name)}</h2>
+      <p><b>Type:</b> ${escapeHtml(item.type)}</p>
+      <p><b>Description:</b> ${escapeHtml(item.desc)}</p>
+      <p><b>Location:</b> ${escapeHtml(item.location)}</p>
+      <p><b>Date:</b> ${escapeHtml(item.date)}</p>
+      <p><b>Reporter:</b> ${escapeHtml(item.reporterName)}</p>
+      <p><b>Student ID:</b> ${escapeHtml(item.reporterStudentID ?? "N/A")}</p>
+      <p><b>Phone:</b> ${escapeHtml(item.reporterPhone ?? "N/A")}</p>
+      <p><b>Email:</b> ${escapeHtml(item.userEmail ?? "N/A")}</p>
+      <p><b>Status:</b> ${escapeHtml(item.status)}</p>
       ${item.imageURL ? `<img src="${item.imageURL}" style="width:100%;margin-top:10px;border-radius:8px;">` : ""}
       ${actionHTML}
       <button id="closeModal" style="margin-top:15px;padding:10px 20px;background:#2980b9;color:white;border:none;border-radius:8px;cursor:pointer;">Close</button>
@@ -361,110 +403,160 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.appendChild(content);
     document.body.appendChild(modal);
 
+    // close handlers
     document.getElementById("closeModal").addEventListener("click", () => modal.remove());
     modal.addEventListener("click", e => { if(e.target === modal) modal.remove(); });
 
-    // Modal claim/admin buttons
-    document.getElementById("claimBtnModal")?.addEventListener("click", async () => {
-      await updateDoc(doc(db, "items", item.id), {
-        status: "pending",
-        claimedBy: currentUser.uid,
-        claimedByName: currentUserData.name ?? "User",
-        claimedAt: Timestamp.now()
-      });
-      alert("Claim submitted! Waiting for admin approval.");
-      modal.remove();
-      loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
-      loadDashboard();
-      loadNotifications();
+    // Modal Claim button handler (use dataset id and stop propagation)
+    const claimBtnModal = document.getElementById("claimBtnModal");
+    claimBtnModal?.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = e.currentTarget?.dataset?.id ?? item.id;
+      if (!id) { alert("Error: missing item id."); return; }
+
+      try {
+        await safeUpdateItem(id, {
+          status: "pending",
+          claimedBy: currentUser.uid,
+          claimedByName: currentUserData?.name ?? "User",
+          claimedAt: Timestamp.now()
+        });
+        alert("Claim submitted! Waiting for admin approval.");
+        modal.remove();
+        loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
+        loadDashboard();
+        loadNotifications();
+      } catch (err) {}
     });
 
-    document.getElementById("approveBtnModal")?.addEventListener("click", async () => {
-      await updateDoc(doc(db, "items", item.id), { status: "approved" });
-      alert("Claim approved!");
-      modal.remove();
-      loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
-      loadDashboard();
-      loadNotifications();
+    // Modal approve/reject for admins
+    const approveBtnModal = document.getElementById("approveBtnModal");
+    approveBtnModal?.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = e.currentTarget?.dataset?.id ?? item.id;
+      if (!id) { alert("Error: missing item id."); return; }
+      try {
+        await safeUpdateItem(id, { status: "approved" });
+        alert("Claim approved!");
+        modal.remove();
+        loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
+        loadDashboard();
+        loadNotifications();
+      } catch (err) {}
     });
 
-    document.getElementById("rejectBtnModal")?.addEventListener("click", async () => {
-      await updateDoc(doc(db, "items", item.id), {
-        status: "active",
-        claimedBy: null,
-        claimedByName: "",
-        claimedAt: null
-      });
-      alert("Claim rejected!");
-      modal.remove();
-      loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
-      loadDashboard();
-      loadNotifications();
+    const rejectBtnModal = document.getElementById("rejectBtnModal");
+    rejectBtnModal?.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const id = e.currentTarget?.dataset?.id ?? item.id;
+      if (!id) { alert("Error: missing item id."); return; }
+      try {
+        await safeUpdateItem(id, {
+          status: "active",
+          claimedBy: null,
+          claimedByName: "",
+          claimedAt: null
+        });
+        alert("Claim rejected!");
+        modal.remove();
+        loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
+        loadDashboard();
+        loadNotifications();
+      } catch (err) {}
     });
   }
 
-  // --- Notifications ---
   notificationBtn?.addEventListener("click", () => {
+    if (!notifDropdown) return;
     notifDropdown.style.display = notifDropdown.style.display === "block" ? "none" : "block";
   });
 
   async function loadNotifications() {
     if(!currentUser) return;
-    const snapshot = await getDocs(collection(db, "items"));
-    const notifications = [];
+    try {
+      const snapshot = await getDocs(collection(db, "items"));
+      const notifications = [];
 
-    snapshot.forEach(docSnap => {
-      const item = docSnap.data();
-      item.id = docSnap.id;
-      if(currentUserData.role === "admin" && item.status === "pending") notifications.push({ ...item, type: "adminPending" });
-      else if(item.claimedBy === currentUser.uid && item.status !== "active") notifications.push({ ...item, type: "userClaim" });
-    });
+      snapshot.forEach(docSnap => {
+        const item = docSnap.data() ?? {};
+        item.id = docSnap.id;
+        if(currentUserData?.role === "admin" && item.status === "pending") notifications.push({ ...item, _notifType: "adminPending" });
+        else if(item.claimedBy === currentUser.uid && item.status !== "active") notifications.push({ ...item, _notifType: "userClaim" });
+      });
 
-    notifCount.textContent = notifications.length;
-    notifDropdown.innerHTML = "";
+      notifCount.textContent = notifications.length;
+      notifDropdown.innerHTML = "";
 
-    notifications.forEach(item => {
-      const notif = document.createElement("div");
-      notif.style.padding = "10px";
-      notif.style.borderBottom = "1px solid #eee";
+      notifications.forEach(item => {
+        const notif = document.createElement("div");
+        notif.style.padding = "10px";
+        notif.style.borderBottom = "1px solid #eee";
 
-      if(item.type === "adminPending") {
-        notif.innerHTML = `
-          <p><b>${item.reporterName}</b> claimed <b>${item.name}</b></p>
-          <div style="display:flex;gap:5px;margin-top:5px;">
-            <button class="approveBtnNotif" style="padding:5px 10px;background:#27ae60;color:white;border:none;border-radius:6px;cursor:pointer;">Approve</button>
-            <button class="rejectBtnNotif" style="padding:5px 10px;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">Reject</button>
-          </div>
-        `;
+        if(item._notifType === "adminPending") {
+          notif.innerHTML = `
+            <p><b>${escapeHtml(item.reporterName)}</b> claimed <b>${escapeHtml(item.name)}</b></p>
+            <div style="display:flex;gap:5px;margin-top:5px;">
+              <button class="approveBtnNotif" data-id="${item.id}" style="padding:5px 10px;background:#27ae60;color:white;border:none;border-radius:6px;cursor:pointer;">Approve</button>
+              <button class="rejectBtnNotif" data-id="${item.id}" style="padding:5px 10px;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">Reject</button>
+            </div>
+          `;
 
-        notif.querySelector(".approveBtnNotif")?.addEventListener("click", async () => {
-          await updateDoc(doc(db, "items", item.id), { status: "approved" });
-          alert("Claim approved!");
-          loadNotifications();
-          loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
-          loadDashboard();
-        });
-
-        notif.querySelector(".rejectBtnNotif")?.addEventListener("click", async () => {
-          await updateDoc(doc(db, "items", item.id), {
-            status: "active",
-            claimedBy: null,
-            claimedByName: "",
-            claimedAt: null
+          notif.querySelector(".approveBtnNotif")?.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = e.currentTarget?.dataset?.id;
+            if (!id) { alert("Error: missing id."); return; }
+            try {
+              await safeUpdateItem(id, { status: "approved" });
+              alert("Claim approved!");
+              loadNotifications();
+              loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
+              loadDashboard();
+            } catch (err) {}
           });
-          alert("Claim rejected!");
-          loadNotifications();
-          loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
-          loadDashboard();
-        });
 
-      } else if(item.type === "userClaim") {
-        notif.innerHTML = `<p>Your claim on <b>${item.name}</b> is <b>${item.status}</b></p>`;
-      }
+          notif.querySelector(".rejectBtnNotif")?.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = e.currentTarget?.dataset?.id;
+            if (!id) { alert("Error: missing id."); return; }
+            try {
+              await safeUpdateItem(id, {
+                status: "active",
+                claimedBy: null,
+                claimedByName: "",
+                claimedAt: null
+              });
+              alert("Claim rejected!");
+              loadNotifications();
+              loadItems(item.type, item.type === "lost" ? "lostList" : "foundList");
+              loadDashboard();
+            } catch (err) {}
+          });
 
-      notifDropdown.appendChild(notif);
-    });
+        } else if(item._notifType === "userClaim") {
+          notif.innerHTML = `<p>Your claim on <b>${escapeHtml(item.name)}</b> is <b>${escapeHtml(item.status)}</b></p>`;
+        }
+
+        notifDropdown.appendChild(notif);
+      });
+    } catch (err) {
+      console.error("loadNotifications error", err);
+    }
   }
 
-  setInterval(loadNotifications, 10000);
+  // Use a single interval to refresh notifications; ensure only one interval runs
+  let notifInterval = null;
+  if (!notifInterval) {
+    notifInterval = setInterval(loadNotifications, 10000);
+  }
+
+  // Simple helper to prevent XSS when inserting text into innerHTML templates
+  function escapeHtml(text) {
+    if (text === undefined || text === null) return "";
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 });
