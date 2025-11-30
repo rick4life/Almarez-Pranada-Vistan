@@ -127,18 +127,6 @@ header::after {
   100% {transform: rotate(45deg) translateX(100%);}
 }
 
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.logo {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-}
-
 header h1 {
   margin: 0;
   font-size: 1.4rem;
@@ -236,7 +224,7 @@ header h1 {
   transform: scale(1.05);
 }
 
-/* Card styling for dashboard items */
+/* Card styling */
 .card {
   background: linear-gradient(145deg, #ffffff, #e0f7fa);
   border-radius: 12px;
@@ -245,7 +233,7 @@ header h1 {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease-in-out;
+  transition: opacity 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.show {
@@ -330,7 +318,6 @@ header h1 {
   border-radius: 2px;
 }
 
-/* Cards as clickable buttons */
 #dashboard-sections .card {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -370,4 +357,141 @@ header h1 {
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 8px;
+}
+
+/* Buttons (Claim, Approve, Reject) */
+.claimBtn,
+.approveBtn,
+.rejectBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 3px 2px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Claim button with icon */
+.claimBtn::before {
+  content: "🤚";
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+/* Claim button */
+.claimBtn {
+  background: linear-gradient(145deg, #f39c12, #e67e22);
+  color: #fff;
+}
+.claimBtn:hover {
+  background: linear-gradient(145deg, #d78c09, #c96a09);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Approve button */
+.approveBtn {
+  background: linear-gradient(145deg, #27ae60, #2ecc71);
+  color: #fff;
+}
+.approveBtn:hover {
+  background: linear-gradient(145deg, #1e8449, #28b463);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Reject button */
+.rejectBtn {
+  background: linear-gradient(145deg, #c0392b, #e74c3c);
+  color: #fff;
+}
+.rejectBtn:hover {
+  background: linear-gradient(145deg, #922b21, #c0392b);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Status badges */
+.pending-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #e67e22;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.claimed-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #27ae60;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Notifications Dropdown */
+#notifDropdown {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ccc;
+  max-height: 400px;
+  width: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 2000;
+  display: none;
+}
+
+#notifDropdown div {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+#notifDropdown div:last-child {
+  border-bottom: none;
+}
+
+.notif-badge {
+  display: inline-block;
+  background: #e74c3c;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+  margin-left: 5px;
+  vertical-align: top;
+}
+
+/* History section styling */
+#claimedHistoryContainer .card {
+  background: linear-gradient(145deg, #fdf6e3, #fcefc7);
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin: 8px 0;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.4s ease, transform 0.3s ease;
+}
+
+#claimedHistoryContainer .card.show {
+  opacity: 1;
+  transform: translateY(0);
 }
