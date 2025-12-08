@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function isOwner(data) {
+      return isSignedIn() &&
+             request.auth.uid == data.userId;
+    }
+
+    match /users/{userId} {
+      // Users can only access and modify their own user data
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /items/{itemId} {
+
+      // Anyone signed in can read items
+      allow read: if isSignedIn();
+
+      // Anyone signed in can create an item
+      allow create: if isSignedIn();
+
+      // Updating rules
+      allow update: if
+        (
+          // Reporter can edit their own item
+          isOwner(resource.data)
+        ) ||
+        (
+          // Normal user can CLAIM an item (status must become pending)
+          isSignedIn() &&
+          request.resource.data.status == "pending"
+        ) ||
+        (
+          // Admin can approve/reject (any status change allowed)
+          isAdmin()
+        );
+
+      // Only admin or owner can delete
+      allow delete: if isOwner(resource.data) || isAdmin();
+    }
+
+    match /history/{docId} {
+      // Admin can write logs; all signed-in users can read
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
